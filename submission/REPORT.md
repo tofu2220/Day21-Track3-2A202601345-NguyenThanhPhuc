@@ -1,7 +1,7 @@
 # Lab 21 — Evaluation Report
 
-**Họ tên**: <điền>  **MSSV**: <điền>  **Ngày**: <điền>
-**Tier**: `<CPU|LAPTOP|T4|BIGGPU>`  **Base model**: `<model id>`  **GPU thực tế**: `<T4 16GB / ...>`
+**Họ tên**: <điền>  **MSSV**: <điền>  **Ngày**: 2026-08-21
+**Tier**: `CPU` cho NB1, `T4` cho NB2 trở đi  **Base model**: `Qwen/Qwen3.5-0.8B` (NB1), `unsloth/Qwen3.5-4B` (NB2)  **GPU thực tế**: Không có GPU cục bộ; Tesla T4 trên Colab cho NB2
 
 > Mọi con số dưới đây phải khớp với file trong `results/`. Grader kiểm tra chéo.
 
@@ -11,14 +11,17 @@
 
 | | |
 |---|---|
-| Dataset | `<tên + số mẫu>` (mặc định: 250 ticket CSKH → JSON triage) |
-| Train / val | `<n>` / `<n>` (seed 42) |
-| `max_length` | `<n>` — p95 đo được là `<n>` *(results/token_stats.json)* |
-| `MASK_MODE` | `<assistant-only | ...>` |
-| Epochs / max_steps | `<n>` |
+| Dataset | 250 ticket CSKH tiếng Việt → JSON triage |
+| Train / val | 225 / 25 (seed 42) |
+| `max_length` | `512` — p95 đo được là `98` *(results/token_stats.json)* |
+| `MASK_MODE` | `assistant-only` |
+| Epochs / max_steps | Chưa chạy (NB1/NB2) |
 
-**Template có giữ khối `<think>` không?** `<có/không>` — *(results/template_check.json)*
-Nếu không: bạn đã xử lý thế nào?
+**Template có giữ khối `<think>` không?** Có — kết quả kiểm tra là
+`reasoning preserved — safe to train on traces` *(results/template_check.json)*.
+
+`max_length=512` lớn hơn giá trị đề xuất 256 (p95 = 98 token, làm tròn lên),
+nhưng vẫn đủ an toàn cho mẫu dài nhất 101 token trong CPU tier.
 
 ---
 
@@ -26,14 +29,14 @@ Nếu không: bạn đã xử lý thế nào?
 
 | | |
 |---|---|
-| `supervised_fraction` | `<0.xx>` |
-| Câu trả lời nằm trong loss | `<true>` |
-| Câu hỏi KHÔNG nằm trong loss | `<true>` |
+| `supervised_fraction` | `0.3936` |
+| Câu trả lời nằm trong loss | `true` |
+| Câu hỏi KHÔNG nằm trong loss | `true` |
 
 Dán 3–5 dòng đầu của đoạn được tính loss:
 
 ```
-<paste>
+{"intent": "doi_tra", "urgency": "trung_binh", "product": "balo laptop", "sentiment": "trung_tinh"}<|im_end|>
 ```
 
 ---
@@ -42,11 +45,16 @@ Dán 3–5 dòng đầu của đoạn được tính loss:
 
 | Run | target | regression | format | latency (ms) |
 |---|---|---|---|---|
-| (a) base + naive prompt | | | | |
-| (b) base + optimized prompt | | | | |
-| (c) LoRA fine-tune | | | | |
+| (a) base + naive prompt | 0.000 | 0.7578 | 0.000 | 3371.77 |
+| (b) base + optimized prompt | 0.765 | 0.7578 | 1.000 | 1050.19 |
+| (c) LoRA fine-tune | Chưa đo | Chưa đo | Chưa đo | Chưa đo |
 
-**(b) có thật sự mạnh hơn (a) không?** `<có/không>` — nếu không, bạn đã cải thiện (b) thế nào?
+**(b) có thật sự mạnh hơn (a) không?** Có. Baseline (b) đạt target `0.765`,
+cao hơn (a) `0.000`, đồng thời format tăng từ `0.000` lên `1.000`.
+Regression của hai baseline giống nhau ở `0.7578`. Vì (b) đã khá mạnh, fine-tune
+chỉ có ý nghĩa nếu vượt được mốc `0.765` mà không làm suy giảm các nhóm còn lại.
+Tôi không sửa `OPTIMIZED_PROMPT` sau khi đo baseline; prompt được giữ nguyên và
+đóng băng bằng SHA `719e74d3b6232053`.
 Bạn có sửa `OPTIMIZED_PROMPT` không? Nếu có: **làm mạnh lên hay yếu đi**, và vì sao?
 
 ---
