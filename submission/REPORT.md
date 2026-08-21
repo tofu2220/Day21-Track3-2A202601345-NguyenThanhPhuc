@@ -1,6 +1,6 @@
 # Lab 21 — Evaluation Report
 
-**Họ tên**: <điền>  **MSSV**: <điền>  **Ngày**: 2026-08-21
+**Họ tên**: Nguyễn Thanh Phúc  **MSSV**: 2A202601345  **Ngày**: 2026-08-21
 **Tier**: `CPU` cho NB1, `T4` cho NB2 trở đi  **Base model**: `Qwen/Qwen3.5-0.8B` (NB1), `unsloth/Qwen3.5-4B` (NB2)  **GPU thực tế**: Không có GPU cục bộ; Tesla T4 trên Colab cho NB2
 
 > Mọi con số dưới đây phải khớp với file trong `results/`. Grader kiểm tra chéo.
@@ -64,9 +64,9 @@ Bạn có sửa `OPTIMIZED_PROMPT` không? Nếu có: **làm mạnh lên hay y�
 | Run | vị trí | r | trainable | LR | train loss (NB4) | **target (NB5 §4)** | s | VRAM GB |
 |---|---|---|---|---|---|---|---|---|
 | `correct` | text-linear | 16 | 32,464,896 | 0.0001 | 0.6259 | Chưa đo (NB5) | 30 | 12.01 |
-| `attn_only` | q,v | *(matched)* | | | | | | |
-| `wrong_lr` | text-linear | 16 | | | | | | |
-| `qlora` | text-linear | 16 | | | | | | |
+| `attn_only` | q,v | 283 (matched) | 32,456,704 | 0.0001 | 0.5376 | Chưa đo (NB5) | 30 | 12.02 |
+| `wrong_lr` | text-linear | 16 | 32,464,896 | 0.00001 | 1.5704 | Chưa đo (NB5) | 30 | 12.01 |
+| `qlora` | text-linear | 16 | 32,464,896 | 0.0001 | 0.7058 | Chưa đo (NB5) | 30 | 7.09 |
 
 > Xếp hạng bằng cột **target**, không bằng cột train loss — chấm bằng chỉ số thay thế
 > chính là Lỗi #3. Nếu hai cột cho hai thứ tự khác nhau, nói thẳng điều đó ở 4.1: đó là
@@ -74,15 +74,23 @@ Bạn có sửa `OPTIMIZED_PROMPT` không? Nếu có: **làm mạnh lên hay y�
 
 Trả lời ba câu (mỗi câu ≥3 câu văn):
 
-**4.1 — `attn_only` có cùng số tham số huấn luyện với `correct`. Trên tập target nó
-thắng, thua, hay hoà? Thứ tự đó có giống thứ tự theo train loss không? Điều đó nói gì về
-*rank* so với *vị trí gắn adapter*?**
+**4.1 — `attn_only` có cùng số tham số huấn luyện với `correct`.** `attn_only` có
+32,456,704 tham số, còn `correct` có 32,464,896, lệch khoảng 0.025%, nên đây là
+đối chứng công bằng về ngân sách. Điểm target và thứ hạng cuối cùng sẽ được xác định
+ở NB5; không dùng `final_loss` để kết luận. NB4 cho thấy `attn_only` có loss 0.5376,
+thấp hơn `correct` là 0.6259, nhưng loss thấp hơn chưa chứng minh target cao hơn.
 
-**4.2 — `wrong_lr` chỉ khác đúng một con số. Đường loss khác nhau ra sao? Nếu chỉ nhìn
-loss mà không biết LR, bạn sẽ kết luận sai điều gì?**
+**4.2 — `wrong_lr` chỉ khác đúng một con số.** `wrong_lr` dùng learning rate
+0.00001 thay vì 0.0001; final loss là 1.5704 so với 0.6259 của `correct`, cao hơn
+0.9445. Kết quả này cho thấy learning rate thấp hơn 10 lần khiến model học kém trong
+cùng 30 steps. Tuy nhiên, thứ hạng trên task vẫn phải kiểm tra bằng target ở NB5,
+không được suy ra chỉ từ training loss.
 
-**4.3 — `qlora` tiết kiệm bao nhiêu VRAM, trả giá bằng gì? Số đo của bạn có ủng hộ khuyến
-nghị "không dùng QLoRA cho dòng model này" không?**
+**4.3 — `qlora` tiết kiệm bao nhiêu VRAM, trả giá bằng gì?** `qlora` dùng 7.09 GB
+VRAM, so với 12.01 GB của `correct`, tiết kiệm 4.92 GB, tương đương khoảng 41.0%.
+Đổi lại, final loss của QLoRA là 0.7058, cao hơn `correct` 0.0799. Kết luận về chất
+lượng task và việc có ủng hộ khuyến nghị không sẽ chờ các điểm target, regression và
+format được đo ở NB5.
 
 ---
 
