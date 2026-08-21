@@ -15,7 +15,7 @@
 | Train / val | 225 / 25 (seed 42) |
 | `max_length` | `512` — p95 đo được là `98` *(results/token_stats.json)* |
 | `MASK_MODE` | `assistant-only` |
-| Epochs / max_steps | Chưa chạy (NB1/NB2) |
+| Epochs / max_steps | NB3 đã train với `max_steps=30` |
 
 **Template có giữ khối `<think>` không?** Có — kết quả kiểm tra là
 `reasoning preserved — safe to train on traces` *(results/template_check.json)*.
@@ -47,7 +47,7 @@ Dán 3–5 dòng đầu của đoạn được tính loss:
 |---|---|---|---|---|
 | (a) base + naive prompt | 0.000 | 0.7578 | 0.000 | 3371.77 |
 | (b) base + optimized prompt | 0.765 | 0.7578 | 1.000 | 1050.19 |
-| (c) LoRA fine-tune | Chưa đo | Chưa đo | Chưa đo | Chưa đo |
+| (c) LoRA fine-tune | Chưa đo (NB5) | Chưa đo (NB5) | Chưa đo (NB5) | Chưa đo (NB5) |
 
 **(b) có thật sự mạnh hơn (a) không?** Có. Baseline (b) đạt target `0.765`,
 cao hơn (a) `0.000`, đồng thời format tăng từ `0.000` lên `1.000`.
@@ -63,7 +63,7 @@ Bạn có sửa `OPTIMIZED_PROMPT` không? Nếu có: **làm mạnh lên hay y�
 
 | Run | vị trí | r | trainable | LR | train loss (NB4) | **target (NB5 §4)** | s | VRAM GB |
 |---|---|---|---|---|---|---|---|---|
-| `correct` | text-linear | 16 | | | | | | |
+| `correct` | text-linear | 16 | 32,464,896 | 0.0001 | 0.6259 | Chưa đo (NB5) | 30 | 12.01 |
 | `attn_only` | q,v | *(matched)* | | | | | | |
 | `wrong_lr` | text-linear | 16 | | | | | | |
 | `qlora` | text-linear | 16 | | | | | | |
